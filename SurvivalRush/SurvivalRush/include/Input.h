@@ -16,13 +16,18 @@ public:
 	int x;
 	int y;
 
-	bool leftMouseClicked;
+	int selectedSlot;
+	bool leftMouseDown;
 private:
 	const char up = 'w';
 	const char down = 's';
 	const char left = 'a';
 	const char right = 'd';
 
+	const char selectedOne = '1';
+	const char selectedTwo = '2';
+	const char selectedThree = '3';
+	
 	bool upFlag;
 	bool downFlag;
 	bool rightFlag;

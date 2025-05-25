@@ -25,6 +25,21 @@ void Input::GetKeyboardInputDown(unsigned char key)
 	{
 		leftFlag = true;
 	}
+
+	if (key == selectedOne)
+	{
+		selectedSlot = 0;
+	}
+
+	if (key == selectedTwo)
+	{
+		selectedSlot = 1;
+	}
+
+	if (key == selectedThree)
+	{
+		selectedSlot = 2;
+	}
 }
 
 void Input::GetKeyboardInputUp(unsigned char key)

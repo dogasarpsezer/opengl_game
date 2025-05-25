@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <gl/GL.h>
 #include <gl/GLU.h>
+
 class Vector3 {
 public:
     GLfloat x, y, z;
@@ -96,3 +97,6 @@ inline float SignedAngleBetween(const Vector3& from, const Vector3& to, const Ve
     float sign = axisNorm.Dot(fromProj.Cross(toProj)) < 0 ? -1.0f : 1.0f;
     return angle * sign;
 }
+
+const Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
+const Vector3 forward = Vector3(0.0f, 0.0f, 1.0f);

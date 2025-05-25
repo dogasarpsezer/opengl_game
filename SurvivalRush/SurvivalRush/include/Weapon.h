@@ -2,18 +2,38 @@
 #include "SimpleGeo.h"
 #include "SimpleCharacter.h"
 #include "Bullet.h"
-#include <vector>;
+#include <list>;
 
-class Weapon:
+class Weapon
 {
 public:
-	Weapon(Bullet bulletTemplate,float bulletSpeed,float fireRate);
-	void Fire(Vector3 direction);
-	void Update(float& deltaTime);
-private:
+	Weapon(Bullet bulletTemplate,float fireRate);
+	virtual void Fire(Vector3 direction,Vector3 firePos);
+	void Update();
+
+	Weapon* Clone() const
+	{
+		return new Weapon(*this);
+	}
+
+protected:
 	float bulletSpeed;
 	float timer;
 	float fireRate;
 	Bullet bulletTemplate;
-	std::vector<Bullet*> bullets;
+};
+
+class WeaponShotgun : public Weapon
+{
+public:
+	WeaponShotgun(Bullet bulletTemplate, float fireRate,int bulletCount,float bulletSpread);
+	void Fire(Vector3 direction,Vector3 firePos) override;
+
+	WeaponShotgun* Clone() const
+	{
+		return new WeaponShotgun(*this);
+	}
+private:
+	int bulletCount;
+	float bulletSpread;
 };

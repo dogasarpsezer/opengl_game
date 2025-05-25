@@ -10,6 +10,6 @@ public:
 	Transform transform;
 	void Update();
 	void SetColor(Color color);
-private:
+protected:
 	SimpleGeo geometry;
 };

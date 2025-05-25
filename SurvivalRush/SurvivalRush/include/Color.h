@@ -18,13 +18,13 @@ private:
 
 inline Color::Color(GLfloat r, GLfloat g, GLfloat b, GLfloat a) : r(r), g(g), b(b), a(a) {}
 
-const Color red(1.0f, 0.0f, 0.0f);
-const Color blue(0.0f, 0.0f, 1.0f);
-const Color green(0.0f, 1.0f, 0.0f);
-const Color yellow(1.0f, 1.0f, 0.0f);    // bright yellow
-const Color cyan(0.0f, 1.0f, 1.0f);      // teal/light blue
-const Color magenta(1.0f, 0.0f, 1.0f);   // pinkish purple
-const Color orange(1.0f, 0.5f, 0.0f);    // orange
-const Color purple(0.5f, 0.0f, 0.5f); // deep purple 
-const Color white(1.0f, 1.0f, 1.0f);
-const Color black(0.0f, 0.0f, 0.0f);
+extern const Color red;
+extern const Color blue;
+extern const Color green;
+extern const Color yellow;
+extern const Color cyan;
+extern const Color magenta;
+extern const Color orange;
+extern const Color purple;
+extern const Color white;
+extern const Color black;

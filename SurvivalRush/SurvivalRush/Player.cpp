@@ -2,14 +2,14 @@
 #include "include/CustomTime.h"
 #include "include/Debug.h"
 
-Player::Player(float speed,float damping,float maxForce,float rotationSpeed) 
-	: SimpleCharacter(SimpleGeo(TRIANGLE, green)),speed(speed),damping(damping),maxForce(maxForce), rotationSpeed(rotationSpeed)
+Player::Player(float speed, float damping, float maxForce, float rotationSpeed) 
+    : SimpleCharacter(SimpleGeo(TRIANGLE, green)),speed(speed),damping(damping),
+    maxForce(maxForce), rotationSpeed(rotationSpeed)
 {
-
+    weapon[0] = new Weapon(Bullet(SimpleGeo(CIRCLE, yellow, 0.5f), 30, 10, 20), 1);
+    weapon[1] = new Weapon(Bullet(SimpleGeo(SQUARE, red, 0.35f), 25, 25, 100), 1.5f);
+    weapon[2] = new WeaponShotgun(Bullet(SimpleGeo(TRIANGLE, magenta, 0.5f), 15, 15, 15), 1.25f, 2, 30);
 }
-
-Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
-Vector3 forward = Vector3(0.0f, 0.0f, 1.0f);
 
 void Player::PlayerMotionUpdate(const Input& input,const Camera& camera)
 {
@@ -56,4 +56,28 @@ void Player::PlayerMotionUpdate(const Input& input,const Camera& camera)
     Debug::Instance().AddDebug(inputDebug);
     Debug::Instance().AddDebug(playerForwardDebug);
     Debug::Instance().AddDebug(playerRightDebug);
+}
+
+void Player::PlayerActionUpdate(const Input& input)
+{
+    Weapon* currentWeapon = weapon[input.selectedSlot];
+    if (input.leftMouseDown)
+    {
+        currentWeapon->Fire(transform.Forward(),transform.position);
+    }
+
+    for (size_t i = 0; i < 3; i++)
+    {
+        weapon[i]->Update();
+    }
+}
+
+void Player::Reset()
+{
+    velocity = Vector3();
+
+    transform.SetPosition(Vector3());
+    transform.SetRotation(Vector3());
+
+    Update();
 }

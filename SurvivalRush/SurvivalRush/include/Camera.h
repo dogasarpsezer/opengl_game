@@ -5,7 +5,6 @@
 #include <windows.h>    // required before gl.h on Windows
 #include <GL/gl.h>
 #include <GL/glu.h>
-#include <iostream>
 
 
 class Camera {
@@ -45,8 +44,6 @@ inline void Camera::Update(Vector3& playerPos) {
     Vector3 followDir = playerPos - followPos;
     float excessAmount = followDir.Length() - followRadius;
     bool isInFollowRadius = excessAmount <= 0.01f;
-
-    std::cout << "Excess " << excessAmount << std::endl;
 
     if(isInFollowRadius == false)
     {

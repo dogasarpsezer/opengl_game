@@ -3,36 +3,49 @@
 #include <GL/glu.h>
 #include <GL/glut.h>
 #include "Color.h"
+#include "CustomText.h"
 #include "include/Player.h";
 #include "Camera.h"
 #include "Debug.h"
+#include "include/Weapon.h"
 #include "CustomTime.h"
-#include <iostream>
 #include "include/Input.h";
 
 Camera camera(10,3);
 bool debugActive = true;
 Input inputManager = Input();
 Player playerCharacter(10,0.1f,1,10);
-
+float score = 0;
 const float playerSpeed = 5.0f;
+float prevScore;
 
-void init() {
-    glClearColor(0.2f, 0.3f, 0.4f, 1.0f); // background
-    glEnable(GL_DEPTH_TEST);
+void start()
+{
+    BulletManager::Instance().Clear();
+    playerCharacter.Reset();
 
     Vector3 pos = Vector3(0, 20, 0);
     camera.transform.SetPosition(pos); // 10 units above, looking down
     camera.transform.SetRotation(Vector3(-90, 0, 0)); // looking straight down
 
     camera.Init(60, 800.0 / 600.0, 0.1f, 100.0f);
-
-    
     camera.offset = pos - playerCharacter.transform.position;
 
-    playerCharacter.SetColor(green);
 
     CustomTime::Instance().Init(std::chrono::steady_clock::now());
+}
+
+void init() {
+    glClearColor(0.2f, 0.3f, 0.4f, 1.0f); // background
+    glEnable(GL_DEPTH_TEST);
+
+    start();
+}
+
+void restart()
+{
+    prevScore = score;
+    start();
 }
 
 void menuSelected(int value)
@@ -41,6 +54,9 @@ void menuSelected(int value)
     {
     case 0:
         debugActive = !debugActive;
+        break;
+    case 1:
+        restart();
         break;
     default:
         break;
@@ -51,6 +67,7 @@ void menu()
 {
     int menuId = glutCreateMenu(menuSelected);
     glutAddMenuEntry("Toggle Debug", 0);
+    glutAddMenuEntry("Restart", 1);
 }
 
 void DrawGrid(float size = 50.0f, float step = 1.0f)
@@ -74,6 +91,18 @@ void DrawGrid(float size = 50.0f, float step = 1.0f)
     glEnd();
 }
 
+char* GetScoreText(float score)
+{
+    // Convert to minutes and seconds
+    int minutes = static_cast<int>(score) / 60;
+    int seconds = static_cast<int>(score) % 60;
+
+    char buffer[64];
+    snprintf(buffer, sizeof(buffer), "Score: %02dm %02ds", minutes, seconds);
+
+    return buffer;
+}
+
 void update() 
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -87,10 +116,17 @@ void update()
     camera.Update(playerCharacter.transform.position);
     DrawGrid(50,10);
     playerCharacter.PlayerMotionUpdate(inputManager, camera);
-    std::cout<<playerCharacter.transform.position.z<<std::endl;
+    playerCharacter.PlayerActionUpdate(inputManager);
 
+    BulletManager::Instance().Update();
 
-    if(inputManager.leftMouseClicked) Debug::Instance().Update();
+    score += CustomTime::Instance().deltaTime;
+
+    float width = glutGet(GLUT_WINDOW_WIDTH);
+    float height = glutGet(GLUT_WINDOW_HEIGHT);
+    DrawText(GetScoreText(score), width, height, 30, height - 30,GLUT_BITMAP_HELVETICA_18);
+    DrawText(GetScoreText(prevScore), width, height, 30, height - 45,GLUT_BITMAP_HELVETICA_12);
+    if(debugActive) Debug::Instance().Update();
 
     glutSwapBuffers();
 }
@@ -114,7 +150,7 @@ void mouse(int button,int state,int x,int y)
 {
     if(button == GLUT_LEFT_BUTTON)
     {
-        inputManager.leftMouseClicked = !inputManager.leftMouseClicked;
+        inputManager.leftMouseDown = !inputManager.leftMouseDown;
     }
 }
 
