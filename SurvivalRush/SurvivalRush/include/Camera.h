@@ -1,22 +1,28 @@
 #pragma once
 #include "Transform.h"
+#include "Debug.h"
+#include "CustomTime.h"
 #include <windows.h>    // required before gl.h on Windows
 #include <GL/gl.h>
 #include <GL/glu.h>
+#include <iostream>
 
 
 class Camera {
 public:
-	Camera();
-	void Update();
+	Camera(float followRadius,float normalizeSpeed);
+	void Update(Vector3& playerPos);
     void Init(GLdouble fov, GLdouble aspect, GLdouble nearCam, GLdouble farCam);
     Vector3 ScreenPosTo3DPos(int x,int y) const;
     Vector3 ScreenPosTo3DPos(int x, int y, float depth) const;
 	Transform transform;
+    Vector3 offset;
 private:
+    float followRadius;
+    float normalizeSpeed;
 };
 
-inline Camera::Camera() : transform() {}
+inline Camera::Camera(float followRadius,float normalizeSpeed) : transform(offset), followRadius(followRadius),normalizeSpeed(normalizeSpeed){}
 
 inline void Camera::Init(GLdouble fov,GLdouble aspect,GLdouble nearCam, GLdouble farCam)
 {
@@ -26,7 +32,30 @@ inline void Camera::Init(GLdouble fov,GLdouble aspect,GLdouble nearCam, GLdouble
     glMatrixMode(GL_MODELVIEW);
 }
 
-inline void Camera::Update() {
+inline void Camera::Update(Vector3& playerPos) {
+
+    float deltaTime = CustomTime::Instance().deltaTime;
+
+    Vector3 followPos = transform.position - offset;
+    SimpleCharacter* playerFollowRadiusDebug = new SimpleCharacter(SimpleGeo(CIRCLE, magenta));
+    playerFollowRadiusDebug->transform.SetPosition(followPos + Vector3(0, -0.05f, 0));
+    playerFollowRadiusDebug->transform.SetScale(Vector3(followRadius * 2, followRadius * 2, followRadius * 2));
+    Debug::Instance().AddDebug(playerFollowRadiusDebug);
+
+    Vector3 followDir = playerPos - followPos;
+    float excessAmount = followDir.Length() - followRadius;
+    bool isInFollowRadius = excessAmount <= 0.01f;
+
+    std::cout << "Excess " << excessAmount << std::endl;
+
+    if(isInFollowRadius == false)
+    {
+        Vector3 cameraMovementFollow = followDir.Normalized() * excessAmount;
+        transform.Move(cameraMovementFollow);
+    }
+
+
+
     Vector3 eye = transform.position;
 
     // Convert Euler angles to radians

@@ -50,7 +50,7 @@ void Input::GetKeyboardInputUp(unsigned char key)
 	}
 }
 
-float Input::GetKeyboardDirectionHorizontal()
+float Input::GetKeyboardDirectionHorizontal() const
 {
 	float horizontal = 0.0f;
 	if(rightFlag)
@@ -65,7 +65,7 @@ float Input::GetKeyboardDirectionHorizontal()
 	return horizontal;
 }
 
-float Input::GetKeyboardDirectionVertical()
+float Input::GetKeyboardDirectionVertical() const
 {
 	float vertical = 0.0f;
 	if (upFlag)
@@ -86,7 +86,7 @@ void Input::SetMousePosition(int x, int y)
 	this->y = y;
 }
 
-void Input::GetHitOnXZ(const Camera& camera, Vector3& hitPos)
+void Input::GetHitOnXZ(const Camera& camera, Vector3& hitPos) const
 {
 	Vector3 rayOrigin = camera.ScreenPosTo3DPos(x, y, 0.0f);
 	Vector3 rayTarget = camera.ScreenPosTo3DPos(x, y, 1.0f);

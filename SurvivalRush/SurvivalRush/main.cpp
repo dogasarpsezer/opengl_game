@@ -2,23 +2,18 @@
 #include <GL/gl.h>
 #include <GL/glu.h>
 #include <GL/glut.h>
-#include "include/SimpleGeo.h"
 #include "Color.h"
-#include "include/SimpleCharacter.h";
+#include "include/Player.h";
 #include "Camera.h"
-#include "Plane.h"
 #include "Debug.h"
 #include "CustomTime.h"
 #include <iostream>
 #include "include/Input.h";
 
-Camera camera;
-Debug debug;
+Camera camera(10,3);
 bool debugActive = true;
 Input inputManager = Input();
-CustomTime customTime(std::chrono::steady_clock::now());
-
-SimpleCharacter playerCharacter(TRIANGLE);
+Player playerCharacter(10,0.1f,1,10);
 
 const float playerSpeed = 5.0f;
 
@@ -26,13 +21,18 @@ void init() {
     glClearColor(0.2f, 0.3f, 0.4f, 1.0f); // background
     glEnable(GL_DEPTH_TEST);
 
-    camera.transform.SetPosition(Vector3(0, 20, 0)); // 10 units above, looking down
+    Vector3 pos = Vector3(0, 20, 0);
+    camera.transform.SetPosition(pos); // 10 units above, looking down
     camera.transform.SetRotation(Vector3(-90, 0, 0)); // looking straight down
 
     camera.Init(60, 800.0 / 600.0, 0.1f, 100.0f);
 
+    
+    camera.offset = pos - playerCharacter.transform.position;
 
     playerCharacter.SetColor(green);
+
+    CustomTime::Instance().Init(std::chrono::steady_clock::now());
 }
 
 void menuSelected(int value)
@@ -53,6 +53,26 @@ void menu()
     glutAddMenuEntry("Toggle Debug", 0);
 }
 
+void DrawGrid(float size = 50.0f, float step = 1.0f)
+{
+    glDisable(GL_LIGHTING); // optional, depends on your setup
+    glColor3f(0.6f, 0.6f, 0.6f); // grid color (light gray)
+
+    glBegin(GL_LINES);
+
+    for (float i = -size; i <= size; i += step)
+    {
+        // Lines parallel to X
+        glVertex3f(i, -1, -size);
+        glVertex3f(i, -1, size);
+
+        // Lines parallel to Z
+        glVertex3f(-size, -1, i);
+        glVertex3f(size, -1, i);
+    }
+
+    glEnd();
+}
 
 void update() 
 {
@@ -61,60 +81,16 @@ void update()
     glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-    debug.Cleanup();
+    Debug::Instance().Cleanup();
 
-    customTime.Update();
-
-    Vector3 up = Vector3(0.0f, 1.0f, 0.0f);
-    Vector3 forward = Vector3(0.0f, 0.0f, 1.0f);
-
-    //playerCharacter.transform.RotateOnY(angleToRotate);
-
-#pragma region Keyboard Input Handle 
-    
-    float horizontalInput = inputManager.GetKeyboardDirectionHorizontal();
-    float verticalInput = inputManager.GetKeyboardDirectionVertical();
-
-    Vector3 forwardInput = playerCharacter.transform.Forward() * verticalInput;
-    Vector3 rightInput = playerCharacter.transform.Right() * horizontalInput;
-
-    Vector3 dir = (forwardInput + rightInput).Normalized();
-
-    Vector3 movement = dir * (playerSpeed * customTime.deltaTime);
-    Vector3 cameraNewPos = camera.transform.position + movement;
-#pragma endregion
-
-    //camera.transform.SetPosition(cameraNewPos);
-    camera.Update();
-
-    Vector3 hitPos;
-    inputManager.GetHitOnXZ(camera, hitPos);
-
-    Vector3 playerDir = (hitPos - playerCharacter.transform.position).Normalized();
-    float angleToRotate = SignedAngleBetween(playerCharacter.transform.Forward(), playerDir, up);
-
-    float maxTurnPerFrame = 180.0f * customTime.deltaTime * 10; // degrees per second
-    angleToRotate = Clamp(angleToRotate, -maxTurnPerFrame, maxTurnPerFrame);
-
-    playerCharacter.transform.RotateOnY(angleToRotate);
-
-    playerCharacter.transform.Move(movement);
-    playerCharacter.Update();
+    CustomTime::Instance().Update();
+    camera.Update(playerCharacter.transform.position);
+    DrawGrid(50,10);
+    playerCharacter.PlayerMotionUpdate(inputManager, camera);
+    std::cout<<playerCharacter.transform.position.z<<std::endl;
 
 
-    SimpleCharacter* inputDebug = new SimpleCharacter(SimpleGeo(CIRCLE,white));
-    SimpleCharacter* playerForwardDebug = new SimpleCharacter(SimpleGeo(SQUARE,blue));
-    SimpleCharacter* playerRightDebug = new SimpleCharacter(SimpleGeo(SQUARE,red));
-
-    playerForwardDebug->transform.SetPosition(playerCharacter.transform.position + playerCharacter.transform.Forward() * 3);
-    playerRightDebug->transform.SetPosition(playerCharacter.transform.position + playerCharacter.transform.Right() * 3);
-    inputDebug->transform.SetPosition(hitPos);
-
-    debug.AddDebug(inputDebug);
-    debug.AddDebug(playerForwardDebug);
-    debug.AddDebug(playerRightDebug);
-
-    if(debugActive) debug.Update();
+    if(inputManager.leftMouseClicked) Debug::Instance().Update();
 
     glutSwapBuffers();
 }
@@ -129,9 +105,17 @@ void keyboardUp(unsigned char key, int x, int y)
     inputManager.GetKeyboardInputUp(key);
 }
 
-void passiveMouse(int x,int y)
+void mouseMotion(int x,int y)
 {
     inputManager.SetMousePosition(x,y);
+}
+
+void mouse(int button,int state,int x,int y)
+{
+    if(button == GLUT_LEFT_BUTTON)
+    {
+        inputManager.leftMouseClicked = !inputManager.leftMouseClicked;
+    }
 }
 
 int main(int argc, char** argv) {
@@ -146,7 +130,10 @@ int main(int argc, char** argv) {
     
     glutKeyboardFunc(keyboardDown);
     glutKeyboardUpFunc(keyboardUp);
-    glutPassiveMotionFunc(passiveMouse);
+
+    glutMotionFunc(mouseMotion);
+    glutPassiveMotionFunc(mouseMotion);
+    glutMouseFunc(mouse);
 
     menu();
     glutAttachMenu(GLUT_MIDDLE_BUTTON);

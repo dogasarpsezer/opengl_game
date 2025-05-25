@@ -53,6 +53,16 @@ public:
         return len > 0 ? *this / len : Vector3(0, 0, 0);
     }
 
+    Vector3 ClampMagnitude(float maxLength) const
+    {
+        float len = Length();
+        if (len > maxLength && len > 0.0001f)
+        {
+            return (*this / len) * maxLength;
+        }
+        return *this;
+    }
+
     Vector3 RotateY(float degrees) {
         float radians = degrees * 3.14159f / 180.0f;
         float cosA = cos(radians);
@@ -63,6 +73,10 @@ public:
             y,
             x * sinA + z * cosA
         );
+    }
+
+    Vector3 operator-() const {
+        return Vector3(-x, -y, -z);
     }
 };
 

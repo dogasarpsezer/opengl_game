@@ -5,10 +5,16 @@
 class Debug
 {
 public:
-	void Update();
-	void Cleanup();
-	void AddDebug(SimpleCharacter* debugItem);
+    static Debug& Instance(); 
+
+    void AddDebug(SimpleCharacter* character);
+    void Update();
+    void Cleanup();
+
 private:
-	//List Simple Character
-	std::vector<SimpleCharacter*> debugItems;
+    Debug() = default;                    // private constructor
+    Debug(const Debug&) = delete;         // no copying
+    Debug& operator=(const Debug&) = delete;
+
+    std::vector<SimpleCharacter*> debugItems;
 };

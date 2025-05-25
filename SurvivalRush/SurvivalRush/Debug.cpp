@@ -1,5 +1,11 @@
 #include "include/Debug.h"
 
+Debug& Debug::Instance()
+{
+	static Debug instance; // only created once
+	return instance;
+}
+
 void Debug::Cleanup()
 {
 	for (SimpleCharacter* c : debugItems)
