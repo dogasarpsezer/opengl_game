@@ -1,0 +1,93 @@
+#pragma once
+#include "Transform.h"
+#include <windows.h>    // required before gl.h on Windows
+#include <GL/gl.h>
+#include <GL/glu.h>
+
+
+class Camera {
+public:
+	Camera();
+	void Update();
+    void Init(GLdouble fov, GLdouble aspect, GLdouble nearCam, GLdouble farCam);
+    Vector3 ScreenPosTo3DPos(int x,int y) const;
+    Vector3 ScreenPosTo3DPos(int x, int y, float depth) const;
+	Transform transform;
+private:
+};
+
+inline Camera::Camera() : transform() {}
+
+inline void Camera::Init(GLdouble fov,GLdouble aspect,GLdouble nearCam, GLdouble farCam)
+{
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(fov, aspect, nearCam, farCam);
+    glMatrixMode(GL_MODELVIEW);
+}
+
+inline void Camera::Update() {
+    Vector3 eye = transform.position;
+
+    // Convert Euler angles to radians
+
+    Vector3 target = eye + transform.Forward();
+    Vector3 up(0, 1, 0); // global up (Y+)
+
+    gluLookAt(
+        eye.x, eye.y, eye.z,
+        target.x, target.y, target.z,
+        up.x, up.y, up.z
+    );
+}
+
+inline Vector3 Camera::ScreenPosTo3DPos(int x, int y) const
+{
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLdouble worldX, worldY, worldZ;
+
+    // Get matrices and viewport
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    // Flip Y: Windows has top-left origin, OpenGL uses bottom-left
+    int winY = viewport[3] - y;
+
+    float depth;
+    // Read depth at mouse position (for more accurate result)
+    glReadPixels(x, winY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+
+    // Unproject screen (x, y, depth) to world coordinates
+    gluUnProject(
+        static_cast<GLdouble>(x),
+        static_cast<GLdouble>(winY),
+        static_cast<GLdouble>(depth),
+        modelview, projection, viewport,
+        &worldX, &worldY, &worldZ
+    );
+
+    return Vector3(static_cast<float>(worldX),
+        static_cast<float>(worldY),
+        static_cast<float>(worldZ));
+}
+
+inline Vector3 Camera::ScreenPosTo3DPos(int x, int y, float depth) const
+{
+    GLint viewport[4];
+    GLdouble modelview[16];
+    GLdouble projection[16];
+    GLdouble worldX, worldY, worldZ;
+
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelview);
+    glGetDoublev(GL_PROJECTION_MATRIX, projection);
+    glGetIntegerv(GL_VIEWPORT, viewport);
+
+    int winY = viewport[3] - y;
+
+    gluUnProject(x, winY, depth, modelview, projection, viewport, &worldX, &worldY, &worldZ);
+    return Vector3((float)worldX, (float)worldY, (float)worldZ);
+}
+
