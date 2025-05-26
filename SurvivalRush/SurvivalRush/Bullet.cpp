@@ -1,6 +1,7 @@
 #include "include/Bullet.h"
 #include "include/CustomTime.h"
 #include "include/EnemyManager.h"
+#include "include/Collectible.h"
 #include <iostream>
 
 BulletManager& BulletManager::Instance()
@@ -52,6 +53,8 @@ bool EnemyManager::CheckHits(Bullet* bullet)
 {
 	for (Enemy* enemy : enemies)
 	{
+		if (enemy->Dead()) continue;
+
 		Vector3 p1 = enemy->transform.position;
 		float r1 = enemy->collider.GetRadius(enemy->transform.scale.x);
 
@@ -63,6 +66,12 @@ bool EnemyManager::CheckHits(Bullet* bullet)
 		if(collides)
 		{
 			enemy->Damage(bullet->damage);
+
+			if(enemy->Dead())
+			{
+				CollectibleManager::Instance().CreateCollectible(enemy->transform.position);
+			}
+
 			return true;
 		}
 	}

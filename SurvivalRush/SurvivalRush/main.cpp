@@ -6,6 +6,7 @@
 #include "CustomText.h"
 #include "EnemyManager.h"
 #include "include/Player.h";
+#include "include/Collectible.h";
 #include "Camera.h"
 #include "Debug.h"
 #include "include/Weapon.h"
@@ -15,7 +16,7 @@
 Camera camera(10,3);
 bool debugActive = true;
 Input inputManager = Input();
-Player playerCharacter(10,10,0.1f,1,10,Collider(0.5f));
+Player playerCharacter(50,10,0.1f,1,10,Collider(0.5f));
 float score = 0;
 const float playerSpeed = 5.0f;
 float bestScore;
@@ -24,6 +25,7 @@ void start()
 {
     score = 0;
     BulletManager::Instance().Clear();
+    CollectibleManager::Instance().Reset();
     playerCharacter.Reset();
 
     Vector3 pos = Vector3(0, 20, 0);
@@ -37,8 +39,8 @@ void start()
     CustomTime::Instance().Init(std::chrono::steady_clock::now());
 
     EnemyManager::Instance().spawnMinTime = 0.1f;
-    EnemyManager::Instance().spawnNewEnemyTime = 6.0f;
-    EnemyManager::Instance().timeDecreasePerSpawn = 0.1f;
+    EnemyManager::Instance().spawnNewEnemyTime = 3.0f;
+    EnemyManager::Instance().timeDecreasePerSpawn = 0.05f;
     EnemyManager::Instance().Reset();
 }
 
@@ -110,6 +112,15 @@ char* GetScoreText(float score)
     return buffer;
 }
 
+char* GetHealthText(Player& player)
+{
+    // Convert to minutes and seconds
+    char buffer[64];
+    snprintf(buffer, sizeof(buffer), "Health: %.0f/%.0f", player.health, player.maxHealth);
+
+    return buffer;
+}
+
 void update() 
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -128,6 +139,7 @@ void update()
 
     BulletManager::Instance().Update();
     EnemyManager::Instance().Update(playerCharacter);
+    CollectibleManager::Instance().Update(playerCharacter);
 
     score += CustomTime::Instance().deltaTime;
 
@@ -135,6 +147,13 @@ void update()
     float height = glutGet(GLUT_WINDOW_HEIGHT);
     DrawText(GetScoreText(score), width, height, 30, height - 30,GLUT_BITMAP_HELVETICA_18);
     DrawText(GetScoreText(bestScore), width, height, 30, height - 45,GLUT_BITMAP_HELVETICA_12);
+   
+    int fontHeight = 18;
+    int y = 30; // distance from bottom
+    int textWidth = glutBitmapLength(GLUT_BITMAP_HELVETICA_18, (const unsigned char*)GetHealthText(playerCharacter));
+    int x = (width - textWidth) / 2;
+
+    DrawText(GetHealthText(playerCharacter), width, height, x, y, GLUT_BITMAP_HELVETICA_18);
     if(debugActive) Debug::Instance().Update();
 
     glutSwapBuffers();
@@ -172,7 +191,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800, 600);
-    glutCreateWindow("Survivor Rush");
+    glutCreateWindow("Geometry Survival");
 
     init();
     glutDisplayFunc(update);

@@ -6,9 +6,9 @@ Player::Player(float health,float speed, float damping, float maxForce, float ro
     : SimpleCharacter(SimpleGeo(TRIANGLE, green)), health(health), maxHealth(health), speed(speed), damping(damping),
     maxForce(maxForce), rotationSpeed(rotationSpeed),collider(collider)
 {
-    weapon[0] = new Weapon(Bullet(SimpleGeo(CIRCLE, yellow, 0.5f), 30, 10, 20,Collider(0.25f)), 1);
-    weapon[1] = new Weapon(Bullet(SimpleGeo(SQUARE, red, 0.3f), 25, 25, 100,Collider(0.15f)), 1.5f);
-    weapon[2] = new WeaponShotgun(Bullet(SimpleGeo(TRIANGLE, magenta, 0.5f), 15, 15, 15,Collider(0.25f)), 1.25f, 2, 30);
+    weapon[0] = new Weapon(Bullet(SimpleGeo(CIRCLE, yellow, 0.5f), 30, 5, 20,Collider(0.25f)), 0.5f);
+    weapon[1] = new Weapon(Bullet(SimpleGeo(SQUARE, red, 0.3f), 25, 25, 100,Collider(0.15f)), 2);
+    weapon[2] = new WeaponShotgun(Bullet(SimpleGeo(TRIANGLE, magenta, 0.5f), 15, 15, 15,Collider(0.25f)), 1.5f, 3, 10);
 }
 
 void Player::PlayerMotionUpdate(const Input& input,const Camera& camera)

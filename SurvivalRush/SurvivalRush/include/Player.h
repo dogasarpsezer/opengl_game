@@ -20,15 +20,28 @@ public:
 	{
 		return health <= 0;
 	}
+
+	void Heal(float amount)
+	{
+		health += amount;
+		if(health > maxHealth)
+		{
+			health = maxHealth;
+		}
+
+
+	}
+
 	Collider collider;
+	float health;
+	float maxHealth;
 private:
 	float speed;
 	float maxForce;
 	Vector3 velocity;
 	float damping;
 	float rotationSpeed;
-	float health;
-	float maxHealth;
+
 
 	Weapon* weapon[3];
 };

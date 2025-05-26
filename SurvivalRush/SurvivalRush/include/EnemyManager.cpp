@@ -42,6 +42,12 @@ void Enemy::Move(Vector3 position,std::list<Enemy*>& enemies)
 	}
 
 	transform.Move(velocity * deltaTime);
+
+	Vector3 dir = velocity.Normalized();
+	float signedAngle = SignedAngleBetween(transform.Forward(), dir,up);
+
+	transform.RotateOnY(signedAngle);
+
 	collider.DrawDebug(transform.position,transform.scale);
 }
 
@@ -67,7 +73,7 @@ void EnemyManager::Update(Player& player)
 
 	if(timer >= spawnNewEnemyTime)
 	{
-		float randomAngle = RandomFloat(0.0f,360.0f);
+		float randomAngle = RandomFloat(-180.0f,180.0f);
 		Vector3 dir = forward;
 
 		dir.RotateY(randomAngle);
