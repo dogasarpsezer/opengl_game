@@ -13,7 +13,7 @@
 #include "CustomTime.h"
 #include "include/Input.h";
 
-Camera camera(10,3);
+Camera camera(5,3);
 bool debugActive = true;
 Input inputManager = Input();
 Player playerCharacter(50,10,0.1f,1,10,Collider(0.5f));
