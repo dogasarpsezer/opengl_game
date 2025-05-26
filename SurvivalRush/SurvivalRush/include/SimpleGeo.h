@@ -10,7 +10,8 @@ enum GeoType
 {
 	TRIANGLE,
 	CIRCLE,
-	SQUARE
+	SQUARE,
+	CIRCLE_BOUNDS
 };
 
 class SimpleGeo {

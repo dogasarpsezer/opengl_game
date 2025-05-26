@@ -1,12 +1,13 @@
 #pragma once
 #include "SimpleCharacter.h"
+#include "Collider.h"
 #include "Vector.h"
 #include <list>
 
 class Bullet : public SimpleCharacter
 {
 public:
-	Bullet(SimpleGeo geo, float speed, float damage,float range);
+	Bullet(SimpleGeo geo, float speed, float damage,float range,Collider collider);
 	void Move();
 	bool BulletUpdate();
 	Bullet* Clone(Vector3 direction,Vector3 position)
@@ -21,11 +22,11 @@ public:
 		return newBullet;
 	}
 	float range;
-
+	float damage;
+	Collider collider;
 private:
 	Vector3 direction;
 	float speed;
-	float damage;
 	float totalDistance;
 };
 

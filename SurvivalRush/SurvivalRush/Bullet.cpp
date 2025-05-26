@@ -1,5 +1,6 @@
 #include "include/Bullet.h"
 #include "include/CustomTime.h"
+#include "include/EnemyManager.h"
 #include <iostream>
 
 BulletManager& BulletManager::Instance()
@@ -7,6 +8,7 @@ BulletManager& BulletManager::Instance()
 	static BulletManager instance; // only created once
 	return instance;
 }
+
 
 void BulletManager::Update()
 {
@@ -46,9 +48,31 @@ void BulletManager::Clear()
 	bullets.clear();
 }
 
+bool EnemyManager::CheckHits(Bullet* bullet)
+{
+	for (Enemy* enemy : enemies)
+	{
+		Vector3 p1 = enemy->transform.position;
+		float r1 = enemy->collider.GetRadius(enemy->transform.scale.x);
 
-Bullet::Bullet(SimpleGeo geo,float speed, float damage,float range) : 
-	SimpleCharacter(geo),speed(speed),damage(damage), range(range)
+		Vector3 p2 = bullet->transform.position;
+		float r2 = bullet->collider.GetRadius(bullet->transform.scale.x);
+
+		bool collides = CircleCollision(p1, r1, p2, r2);
+
+		if(collides)
+		{
+			enemy->Damage(bullet->damage);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+
+Bullet::Bullet(SimpleGeo geo, float speed, float damage, float range, Collider collider) :
+	SimpleCharacter(geo), speed(speed), damage(damage), range(range), collider(collider)
 {
 }
 
@@ -67,7 +91,10 @@ void Bullet::Move()
 
 bool Bullet::BulletUpdate()
 {
-	if(totalDistance >= range)
+	collider.DrawDebug(transform.position,transform.scale);
+
+	bool hit = EnemyManager::Instance().CheckHits(this);
+	if(totalDistance >= range || hit)
 	{
 		return true;
 	}

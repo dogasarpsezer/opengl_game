@@ -17,7 +17,6 @@ public:
 	}
 
 protected:
-	float bulletSpeed;
 	float timer;
 	float fireRate;
 	Bullet bulletTemplate;

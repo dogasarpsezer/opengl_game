@@ -43,9 +43,14 @@ public:
         );
     }
 
+    GLfloat SqrLength() const
+    {
+        return x * x + y * y + z * z;
+    }
+
     // Magnitude
     GLfloat Length() const {
-        return std::sqrt(x * x + y * y + z * z);
+        return std::sqrt(SqrLength());
     }
 
     // Normalize

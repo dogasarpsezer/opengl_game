@@ -36,10 +36,10 @@ inline void Camera::Update(Vector3& playerPos) {
     float deltaTime = CustomTime::Instance().deltaTime;
 
     Vector3 followPos = transform.position - offset;
-    SimpleCharacter* playerFollowRadiusDebug = new SimpleCharacter(SimpleGeo(CIRCLE, magenta));
+    /*SimpleCharacter* playerFollowRadiusDebug = new SimpleCharacter(SimpleGeo(CIRCLE, magenta));
     playerFollowRadiusDebug->transform.SetPosition(followPos + Vector3(0, -0.05f, 0));
     playerFollowRadiusDebug->transform.SetScale(Vector3(followRadius * 2, followRadius * 2, followRadius * 2));
-    Debug::Instance().AddDebug(playerFollowRadiusDebug);
+    Debug::Instance().AddDebug(playerFollowRadiusDebug);*/
 
     Vector3 followDir = playerPos - followPos;
     float excessAmount = followDir.Length() - followRadius;

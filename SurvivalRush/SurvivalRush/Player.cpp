@@ -2,13 +2,13 @@
 #include "include/CustomTime.h"
 #include "include/Debug.h"
 
-Player::Player(float speed, float damping, float maxForce, float rotationSpeed) 
-    : SimpleCharacter(SimpleGeo(TRIANGLE, green)),speed(speed),damping(damping),
-    maxForce(maxForce), rotationSpeed(rotationSpeed)
+Player::Player(float health,float speed, float damping, float maxForce, float rotationSpeed,Collider collider) 
+    : SimpleCharacter(SimpleGeo(TRIANGLE, green)), health(health), maxHealth(health), speed(speed), damping(damping),
+    maxForce(maxForce), rotationSpeed(rotationSpeed),collider(collider)
 {
-    weapon[0] = new Weapon(Bullet(SimpleGeo(CIRCLE, yellow, 0.5f), 30, 10, 20), 1);
-    weapon[1] = new Weapon(Bullet(SimpleGeo(SQUARE, red, 0.35f), 25, 25, 100), 1.5f);
-    weapon[2] = new WeaponShotgun(Bullet(SimpleGeo(TRIANGLE, magenta, 0.5f), 15, 15, 15), 1.25f, 2, 30);
+    weapon[0] = new Weapon(Bullet(SimpleGeo(CIRCLE, yellow, 0.5f), 30, 10, 20,Collider(0.25f)), 1);
+    weapon[1] = new Weapon(Bullet(SimpleGeo(SQUARE, red, 0.3f), 25, 25, 100,Collider(0.15f)), 1.5f);
+    weapon[2] = new WeaponShotgun(Bullet(SimpleGeo(TRIANGLE, magenta, 0.5f), 15, 15, 15,Collider(0.25f)), 1.25f, 2, 30);
 }
 
 void Player::PlayerMotionUpdate(const Input& input,const Camera& camera)
@@ -56,6 +56,8 @@ void Player::PlayerMotionUpdate(const Input& input,const Camera& camera)
     Debug::Instance().AddDebug(inputDebug);
     Debug::Instance().AddDebug(playerForwardDebug);
     Debug::Instance().AddDebug(playerRightDebug);
+
+    collider.DrawDebug(transform.position,transform.scale);
 }
 
 void Player::PlayerActionUpdate(const Input& input)
@@ -74,6 +76,7 @@ void Player::PlayerActionUpdate(const Input& input)
 
 void Player::Reset()
 {
+    health = maxHealth;
     velocity = Vector3();
 
     transform.SetPosition(Vector3());

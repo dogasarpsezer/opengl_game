@@ -1,7 +1,6 @@
 #pragma once
-
-#include "include/Transform.h";
-#include "include/SimpleGeo.h";
+#include "Transform.h"
+#include "SimpleGeo.h"
 
 class SimpleCharacter
 {

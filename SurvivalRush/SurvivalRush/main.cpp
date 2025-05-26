@@ -4,6 +4,7 @@
 #include <GL/glut.h>
 #include "Color.h"
 #include "CustomText.h"
+#include "EnemyManager.h"
 #include "include/Player.h";
 #include "Camera.h"
 #include "Debug.h"
@@ -14,13 +15,14 @@
 Camera camera(10,3);
 bool debugActive = true;
 Input inputManager = Input();
-Player playerCharacter(10,0.1f,1,10);
+Player playerCharacter(10,10,0.1f,1,10,Collider(0.5f));
 float score = 0;
 const float playerSpeed = 5.0f;
-float prevScore;
+float bestScore;
 
 void start()
 {
+    score = 0;
     BulletManager::Instance().Clear();
     playerCharacter.Reset();
 
@@ -33,6 +35,11 @@ void start()
 
 
     CustomTime::Instance().Init(std::chrono::steady_clock::now());
+
+    EnemyManager::Instance().spawnMinTime = 0.1f;
+    EnemyManager::Instance().spawnNewEnemyTime = 6.0f;
+    EnemyManager::Instance().timeDecreasePerSpawn = 0.1f;
+    EnemyManager::Instance().Reset();
 }
 
 void init() {
@@ -44,7 +51,7 @@ void init() {
 
 void restart()
 {
-    prevScore = score;
+    if (score > bestScore) bestScore = score;
     start();
 }
 
@@ -114,21 +121,28 @@ void update()
 
     CustomTime::Instance().Update();
     camera.Update(playerCharacter.transform.position);
+
     DrawGrid(50,10);
     playerCharacter.PlayerMotionUpdate(inputManager, camera);
     playerCharacter.PlayerActionUpdate(inputManager);
 
     BulletManager::Instance().Update();
+    EnemyManager::Instance().Update(playerCharacter);
 
     score += CustomTime::Instance().deltaTime;
 
     float width = glutGet(GLUT_WINDOW_WIDTH);
     float height = glutGet(GLUT_WINDOW_HEIGHT);
     DrawText(GetScoreText(score), width, height, 30, height - 30,GLUT_BITMAP_HELVETICA_18);
-    DrawText(GetScoreText(prevScore), width, height, 30, height - 45,GLUT_BITMAP_HELVETICA_12);
+    DrawText(GetScoreText(bestScore), width, height, 30, height - 45,GLUT_BITMAP_HELVETICA_12);
     if(debugActive) Debug::Instance().Update();
 
     glutSwapBuffers();
+
+    if (playerCharacter.Dead())
+    {
+        restart();
+    }
 }
 
 void keyboardDown(unsigned char key,int x, int y)
@@ -150,7 +164,7 @@ void mouse(int button,int state,int x,int y)
 {
     if(button == GLUT_LEFT_BUTTON)
     {
-        inputManager.leftMouseDown = !inputManager.leftMouseDown;
+        inputManager.leftMouseDown = state == GLUT_DOWN;
     }
 }
 
@@ -158,7 +172,7 @@ int main(int argc, char** argv) {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glutInitWindowSize(800, 600);
-    glutCreateWindow("Top-Down Plane View");
+    glutCreateWindow("Survivor Rush");
 
     init();
     glutDisplayFunc(update);

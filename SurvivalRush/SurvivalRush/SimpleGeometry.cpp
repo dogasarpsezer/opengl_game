@@ -45,6 +45,28 @@ void SimpleGeo::Draw(Transform transform)
 		glEnd();
 		break;
 	}
+	case CIRCLE_BOUNDS:
+	{
+		glLineWidth(2.0f);
+		glBegin(GL_LINE_LOOP);
+
+		const int stepCount = 64;
+		const float twoPI = 2 * 3.14159f;
+
+		for (int i = 0; i < stepCount; i++)
+		{
+			float t = static_cast<float>(i) / stepCount;
+			float angle = t * twoPI;
+
+			float x = cos(angle) * halfSize;
+			float z = sin(angle) * halfSize;
+
+			glVertex3f(x, 0, z);
+		}
+
+		glEnd();
+		break;
+	}
 	case SQUARE:
 		glBegin(GL_QUADS);
 		glVertex3f(halfSize, 0.0f, halfSize);
